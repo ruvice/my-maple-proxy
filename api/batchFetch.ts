@@ -1,7 +1,7 @@
 import { Ocid, OpenAPIStatResponse, OpenAPICharacterBasicResponse, OpenAPIItemEquipmentResponse, OpenAPIOcidQueryResponse, OpenAPISymbolEquipmentResponse, Character, ExpData } from "../types"
 import { AppError, ErrorCode } from "./utils/AppError";
 import { getFromProxy, getOCID, ProxyOCIDRequest } from "./utils/fetchFromNexon";
-import { delay, getAPIDate, getAPIDateForXDaysAgo } from "./utils/helper";
+import { delay, getAPIDate, getAPIDateForXDaysAgo, getNext2amSGTEpoch } from "./utils/helper";
 
 const BASIC_PATH = "maplestorysea/v1/character/basic";
 const ITEM_PATH = "maplestorysea/v1/character/item-equipment";
@@ -61,8 +61,14 @@ export default async function handler(req: Request): Promise<Response> {
         name: characterName,
         ocid: ocid
     }
+
+    const [basicRes, equipRes, symbolRes, statRes] = await Promise.all([
+        fetchCharacterBasic(ocid),
+        fetchCharacterItemEquip(ocid),
+        fetchCharacterSymbol(ocid),
+        fetchCharacterStat(ocid)
+    ]);
     
-    const basicRes = await fetchCharacterBasic(ocid);
     if (!(basicRes instanceof AppError)) {
         character.basic = basicRes
         const expData: ExpData = {
@@ -74,16 +80,14 @@ export default async function handler(req: Request): Promise<Response> {
         character.expProgression = [...progression, expData]
     }
 
-    const equipRes = await fetchCharacterItemEquip(ocid);
     if (!(equipRes instanceof AppError)) {
         character.equips = equipRes
     }
-    const symbolRes = await fetchCharacterSymbol(ocid);
+
     if (!(symbolRes instanceof AppError)) {
         character.symbol = symbolRes
     }
 
-    const statRes = await fetchCharacterStat(ocid);
     if (!(statRes instanceof AppError)) {
         character.stat = statRes
     }
@@ -91,21 +95,27 @@ export default async function handler(req: Request): Promise<Response> {
     for (let i = 1; i < 5; i++) {
         await delay(500);
         const expRes = await fetchCharacterEXP(ocid, i);
-        
-        const expData: ExpData = {
-            date: expRes.date,
-            exp: expRes.character_exp,
-            exp_rate: expRes.character_exp_rate
-        };
-        const progression = character?.expProgression ?? [];
-        character.expProgression = [...progression, expData]
+        if (!(expRes instanceof AppError)) {
+            const expData: ExpData = {
+                date: expRes.date,
+                exp: expRes.character_exp,
+                exp_rate: expRes.character_exp_rate
+            };
+            const progression = character?.expProgression ?? [];
+            character.expProgression = [...progression, expData]
+        }
     }
+
+    const targetEpoch = getNext2amSGTEpoch(); // your desired expiry
+    const now = Math.floor(Date.now() / 1000);
+    const ttl = Math.max(0, targetEpoch - now);
 
     return new Response(JSON.stringify(character), {
         status: 200,
         headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": origin
+            "Access-Control-Allow-Origin": origin,
+            'Cache-Control': `s-maxage=${ttl}, stale-while-revalidate=60`
         },
     });
 }

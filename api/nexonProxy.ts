@@ -1,3 +1,5 @@
+import { getNext2amSGTEpoch } from "./utils/helper";
+
 export default async function handler(req: Request): Promise<Response> {
     const { searchParams } = new URL(req.url, `http://localhost`);
   
@@ -42,11 +44,16 @@ export default async function handler(req: Request): Promise<Response> {
     });
   
     const body = await response.text(); // Forward raw response
+    const targetEpoch = getNext2amSGTEpoch(); // your desired expiry
+    const now = Math.floor(Date.now() / 1000);
+    const ttl = Math.max(0, targetEpoch - now);
+
     return new Response(body, {
         status: response.status,
         headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": origin
+            "Access-Control-Allow-Origin": origin,
+            'Cache-Control': `s-maxage=${ttl}, stale-while-revalidate=60`
         },
     });
 }
