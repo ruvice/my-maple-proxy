@@ -2,7 +2,7 @@ export default async function handler(req: Request): Promise<Response> {
     const { searchParams } = new URL(req.url, `http://localhost`);
   
     const path = searchParams.get("path");
-    const apiKey = process.env.OPEN_API_KEY2;
+    const apiKey = process.env.OPEN_API_KEY;
     const domain = 'https://open.api.nexon.com'
     const allowedOrigins = [
         "https://localhost:8080",
