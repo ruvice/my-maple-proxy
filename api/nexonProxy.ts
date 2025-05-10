@@ -7,7 +7,7 @@ export default async function handler(req: Request): Promise<Response> {
     const allowedOrigins = [
         "https://localhost:8080",
         "https://extension-files.twitch.tv",
-        "https://vgxcnnkl2o4t2k8fbdrqszhbphh9pc.ext-twitch.tv/"
+        "https://vgxcnnkl2o4t2k8fbdrqszhbphh9pc.ext-twitch.tv"
     ];
       
     const origin = req.headers.get("origin") || req.headers.get("referer");
