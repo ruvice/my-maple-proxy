@@ -19,23 +19,23 @@ export default async function handler(req: Request): Promise<Response> {
     const { searchParams } = new URL(req.url, `http://localhost`);
   
     const characterName = searchParams.get("character_name");
-    // const allowedOrigins = [
-    //     "https://localhost:8080",
-    //     "https://extension-files.twitch.tv",
-    //     "https://vgxcnnkl2o4t2k8fbdrqszhbphh9pc.ext-twitch.tv"
-    // ];
+    const allowedOrigins = [
+        "https://localhost:8080",
+        "https://extension-files.twitch.tv",
+        "https://vgxcnnkl2o4t2k8fbdrqszhbphh9pc.ext-twitch.tv"
+    ];
       
-    // const origin = req.headers.get("origin") || req.headers.get("referer");
+    const origin = req.headers.get("origin") || req.headers.get("referer");
       
-    // if (!origin || !allowedOrigins.some(o => origin.startsWith(o))) {
-    //     return new Response(JSON.stringify({ error: "Forbidden" }), {
-    //         status: 403,
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             "Access-Control-Allow-Origin": "null" // block
-    //         }
-    //     });
-    // }
+    if (!origin || !allowedOrigins.some(o => origin.startsWith(o))) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "null" // block
+            }
+        });
+    }
   
     if (!characterName) {
         return new Response(JSON.stringify({ error: "Bad request params" }), {
