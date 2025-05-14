@@ -18,6 +18,18 @@ const fetchCharacterEXP = async (ocid: Ocid, offset: number) =>
 const fetchCharacterStat = async (ocid: Ocid) => getFromProxy<OpenAPIStatResponse>({'path': STAT_PATH, "ocid": ocid, "date": getAPIDate()});
 
 export default async function handler(req: Request): Promise<Response> {
+    if (req.method === "OPTIONS") {
+        const origin = req.headers.get("origin");
+        return new Response(null, {
+            status: 204,
+            headers: {
+            "Access-Control-Allow-Origin": origin ?? "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+            },
+        });
+    }
+
     const { searchParams } = new URL(req.url, `http://localhost`);
   
     const characterName = searchParams.get("character_name");
