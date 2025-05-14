@@ -1,4 +1,4 @@
-import { Ocid, OpenAPIOcidQueryResponse } from "../../types";
+import { Ocid, OpenAPIOcidQueryResponse } from "../../../models/apiTypes";
 import { AppError, ErrorCode } from "./AppError";
 export type ProxyOCIDRequest = {
     characterName: string;
@@ -55,23 +55,15 @@ export const getFromProxy = async <T>(params: ProxyRequest) => {
 
     const apiKey = process.env.OPEN_API_KEY;
     if (!apiKey) {
-        return new Response(JSON.stringify({ error: "Missing env vars" }), {
-            status: 500,
-            headers: { 
-                "Content-Type": "application/json", 
-                "Access-Control-Allow-Origin": origin 
-            },
-        });
+        return new AppError(ErrorCode.MISSING_API_KEY, 500)
     }
 
-    if (!ocid || !date) {
-        return new Response(JSON.stringify({ error: "Bad request params" }), {
-            status: 400,
-            headers: { 
-                "Content-Type": "application/json", 
-                "Access-Control-Allow-Origin": origin 
-            },
-        });
+    if (!ocid) {
+        return new AppError(ErrorCode.INVALID_OCID, 400)
+    }
+
+    if (!date) {
+        return new AppError(ErrorCode.INVALID_DATE, 400)
     }
 
     try {
@@ -82,7 +74,7 @@ export const getFromProxy = async <T>(params: ProxyRequest) => {
             const errorText = await response.text();
             throw new Error(`Nexon API error ${response.status}: ${errorText}`);
         }
-        const data = await response.json()
+        const data: T = await response.json()
         console.log(data)
         return data;
     } catch (err) {

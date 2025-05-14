@@ -1,7 +1,9 @@
-import { Ocid, OpenAPIStatResponse, OpenAPICharacterBasicResponse, OpenAPIItemEquipmentResponse, OpenAPIOcidQueryResponse, OpenAPISymbolEquipmentResponse, Character, ExpData } from "../types"
-import { AppError, ErrorCode } from "./utils/AppError";
-import { getFromProxy, getOCID, ProxyOCIDRequest } from "./utils/fetchFromNexon";
-import { delay, getAPIDate, getAPIDateForXDaysAgo, getNext2amSGTEpoch } from "./utils/helper";
+import { Ocid, OpenAPIStatResponse, OpenAPICharacterBasicResponse, OpenAPIItemEquipmentResponse, OpenAPIOcidQueryResponse, OpenAPISymbolEquipmentResponse, ExpData } from "../models/apiTypes"
+import { Character } from "../models/maple/mapleModels";
+import { parseBasicRes, parseEquipRes, parseStatRes, parseSymbolRes } from "./utils/apiResponseParser";
+import { AppError, ErrorCode } from "./utils/network/AppError";
+import { getFromProxy, getOCID, ProxyOCIDRequest } from "./utils/network/fetchFromNexon";
+import { delay, getAPIDate, getAPIDateForXDaysAgo, getNext2amSGTEpoch } from "./utils/network/helper";
 
 const BASIC_PATH = "maplestorysea/v1/character/basic";
 const ITEM_PATH = "maplestorysea/v1/character/item-equipment";
@@ -70,7 +72,7 @@ export default async function handler(req: Request): Promise<Response> {
     ]);
     
     if (!(basicRes instanceof AppError)) {
-        character.basic = basicRes
+        character.basic = parseBasicRes(basicRes)
         const expData: ExpData = {
             date: basicRes.date,
             exp: basicRes.character_exp,
@@ -81,15 +83,15 @@ export default async function handler(req: Request): Promise<Response> {
     }
 
     if (!(equipRes instanceof AppError)) {
-        character.equips = equipRes
+        character.equips = parseEquipRes(equipRes)
     }
 
     if (!(symbolRes instanceof AppError)) {
-        character.symbol = symbolRes
+        character.symbol = parseSymbolRes(symbolRes)
     }
 
     if (!(statRes instanceof AppError)) {
-        character.stat = statRes
+        character.stat = parseStatRes(statRes)
     }
     
     for (let i = 1; i < 5; i++) {

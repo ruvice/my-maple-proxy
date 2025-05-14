@@ -1,4 +1,4 @@
-import { getNext2amSGTEpoch } from "./utils/helper";
+import { getNext2amSGTEpoch } from "./utils/network/helper";
 
 export default async function handler(req: Request): Promise<Response> {
     const { searchParams } = new URL(req.url, `http://localhost`);

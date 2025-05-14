@@ -1,15 +1,15 @@
 // equipmentTypes.ts
-export interface Equipment {
+export interface EquipmentResponse {
     item_equipment_part: string,
     item_equipment_slot: string,
     item_name: string,
     item_icon: string,
-    item_description: null,
+    item_description: string,
     item_shape_name: string,
     item_shape_icon: string,
-    item_gender: null,
-    item_total_option: ItemTotalOption,
-    item_base_option: ItemBaseOption,
+    item_gender: string,
+    item_total_option: ItemTotalOptionResponse,
+    item_base_option: ItemBaseOptionResponse,
     potential_option_grade: string,
     additional_potential_option_grade: string,
     potential_option_flag: string,
@@ -21,8 +21,8 @@ export interface Equipment {
     additional_potential_option_2: string,
     additional_potential_option_3: string,
     equipment_level_increase: number,
-    item_exceptional_option: ItemExceptionalOption,
-    item_add_option: ItemAddOption,
+    item_exceptional_option: ItemExceptionalOptionResponse,
+    item_add_option: ItemAddOptionResponse,
     growth_exp: number,
     growth_level: number,
     scroll_upgrade: string,
@@ -32,15 +32,15 @@ export interface Equipment {
     scroll_upgradeable_count: string,
     soul_name: string,
     soul_option: string,
-    item_etc_option: ItemEtcOption,
+    item_etc_option: ItemEtcOptionResponse,
     starforce: string,
     starforce_scroll_flag: string,
-    item_starforce_option: ItemStarForceOption,
+    item_starforce_option: ItemStarForceOptionResponse,
     special_ring_level: number,
-    date_expire: null
+    date_expire: string
 }
 
-export interface ItemTotalOption {
+export interface ItemTotalOptionResponse {
     [key: string]: string|number; // ✅ allows dynamic access like totalOptions[statKey]
     str: string;
     dex: string;
@@ -63,7 +63,7 @@ export interface ItemTotalOption {
 }
 
 
-export interface ItemBaseOption {
+export interface ItemBaseOptionResponse {
     [key: string]: string|number; // ✅ allows dynamic access like totalOptions[statKey]
     str: string;
     dex: string;
@@ -84,7 +84,7 @@ export interface ItemBaseOption {
     base_equipment_level: number;
 }
 
-export interface ItemExceptionalOption {
+export interface ItemExceptionalOptionResponse {
     [key: string]: string|number; // ✅ allows dynamic access like totalOptions[statKey]
     str: string;
     dex: string;
@@ -97,7 +97,7 @@ export interface ItemExceptionalOption {
     exceptional_upgrade: number;
 }
 
-export interface ItemAddOption {
+export interface ItemAddOptionResponse {
     [key: string]: string|number; // ✅ allows dynamic access like totalOptions[statKey]
     str: string;
     dex: string;
@@ -117,7 +117,7 @@ export interface ItemAddOption {
 }
 
 
-export interface ItemEtcOption {
+export interface ItemEtcOptionResponse {
     [key: string]: string|number; // ✅ allows dynamic access like totalOptions[statKey]
     str: string,
     dex: string,
@@ -132,7 +132,7 @@ export interface ItemEtcOption {
     jump: string
 }
 
-export interface ItemStarForceOption {
+export interface ItemStarForceOptionResponse {
     [key: string]: string; // ✅ allows dynamic access like totalOptions[statKey]
     str: string;
     dex: string;
@@ -147,7 +147,8 @@ export interface ItemStarForceOption {
     jump: string;
 }
 
-export interface EquipmentTitleModel {
+export type EquipmentTitleModel = EquipmentTitleModelResponse
+export interface EquipmentTitleModelResponse {
     title_name: string,
     title_icon: string,
     title_description: string,
@@ -155,7 +156,7 @@ export interface EquipmentTitleModel {
     date_option_expire: string
 }
 
-export interface Symbol {
+export interface MapleSymbolResponse {
     symbol_name: string,
     symbol_icon: string,
     symbol_description: string,
