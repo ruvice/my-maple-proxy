@@ -20,7 +20,7 @@ const fetchCharacterStat = async (ocid: Ocid) => getFromProxy<OpenAPIStatRespons
 // Helper to build dynamic CORS headers
 function buildCORSHeaders(origin: string) {
   return {
-    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "*",
     "Access-Control-Allow-Credentials": "true",
@@ -53,7 +53,8 @@ export default async function handler(req: Request): Promise<Response> {
     const { searchParams } = new URL(req.url, `http://localhost`);
   
     const characterName = searchParams.get("character_name");
-    if (!origin || !allowedOrigins.some(o => origin.startsWith(o))) {
+    // if (!origin || !allowedOrigins.some(o => origin.startsWith(o))) {
+    if (!origin) {
         return new Response(JSON.stringify({ error: "Forbidden" }), {
             status: 403,
             headers: {
