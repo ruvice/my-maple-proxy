@@ -1,7 +1,7 @@
 import { getNext2amSGTEpoch } from "./utils/helper";
 
 export default async function handler(req: Request): Promise<Response> {
-    const { searchParams } = new URL(req.url, `http://localhost`);
+    const { searchParams } = new URL(req.url, `http://localhost`) || req.headers.get("referer");;
   
     const path = searchParams.get("path");
     const apiKey = process.env.OPEN_API_KEY;
