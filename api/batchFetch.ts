@@ -35,24 +35,25 @@ export default async function handler(req: Request): Promise<Response> {
         "https://vgxcnnkl2o4t2k8fbdrqszhbphh9pc.ext-twitch.tv"
     ];
       
-    const origin = req.headers.get("origin") || req.headers.get("referer");
-    // if (!origin || !allowedOrigins.some(o => origin.startsWith(o))) {
-    //     return new Response(JSON.stringify({ error: "Forbidden" }), {
-    //         status: 403,
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             "Access-Control-Allow-Origin": "null" // block
-    //         }
-    //     });
-    // }
+    const origin = req.headers.get("origin");
+    console.log(origin)
+      
+    if (!origin || !allowedOrigins.some(o => origin.startsWith(o))) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "null" // block
+            }
+        });
+    }
   
     if (!characterName) {
         return new Response(JSON.stringify({ error: "Bad request params" }), {
             status: 400,
             headers: { 
                 "Content-Type": "application/json", 
-                // "Access-Control-Allow-Origin": origin 
-                ...corsHeaders,
+                "Access-Control-Allow-Origin": origin 
             },
         });
     }
@@ -63,9 +64,7 @@ export default async function handler(req: Request): Promise<Response> {
     }
     const ocidRes = await getOCID<OpenAPIOcidQueryResponse>(ocidRequest)
     if (ocidRes instanceof AppError)  {
-        // return handleError(ocidRes, origin);
-        
-        return handleError(ocidRes, "origin");
+        return handleError(ocidRes, origin);
     }
     const ocid = ocidRes.ocid;
     // Fetch the rest and build Character model
@@ -126,8 +125,7 @@ export default async function handler(req: Request): Promise<Response> {
         status: 200,
         headers: { 
             "Content-Type": "application/json",
-            // "Access-Control-Allow-Origin": origin,
-            ...corsHeaders,
+            "Access-Control-Allow-Origin": origin,
             'Cache-Control': `s-maxage=${ttl}, stale-while-revalidate=60`
         },
     });
@@ -138,8 +136,7 @@ function handleError(error: AppError, origin: string) {
         status: error.status,
         headers: {
             "Content-Type": "application/json",
-            ...corsHeaders,
-            // "Access-Control-Allow-Origin": origin // block
+            "Access-Control-Allow-Origin": origin // block
         }
     });
 }
