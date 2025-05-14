@@ -8,10 +8,13 @@ import { CharacterClassMapping } from "./constants";
 import { parseEquip } from "./parsers/equipmentParser";
 
 export function parseBasicRes(res: OpenAPICharacterBasicResponse): BasicCharacterInfo {
+    const characterClass = CharacterClassMapping[res.character_class]
     return {
+        date: res.date,
         character_name: res.character_name,
         world_name: res.world_name,
         character_gender: res.character_gender,
+        character_class: characterClass,
         character_class_level: toNum(res.character_class_level),
         character_level: toNum(res.character_level),
         character_exp: toNum(res.character_exp),

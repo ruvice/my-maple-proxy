@@ -23,7 +23,8 @@ export const ItemEquipmentSlotMapping: Record<string, ItemEquipmentSlot> = {
     "medal" : ItemEquipmentSlot.Medal,
     "secondaryweapons" : ItemEquipmentSlot.SecondaryWeapons,
     "cape" : ItemEquipmentSlot.Cape,
-    "mechanicalheart": ItemEquipmentSlot.MechanicalHeart
+    "mechanicalheart": ItemEquipmentSlot.MechanicalHeart,
+    "pocketitem": ItemEquipmentSlot.PocketItem
 }
 
 export const PotentialMapping: Record<string, Potential> = {
