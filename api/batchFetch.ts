@@ -17,33 +17,48 @@ const fetchCharacterEXP = async (ocid: Ocid, offset: number) =>
    getFromProxy<OpenAPICharacterBasicResponse>({'path': BASIC_PATH, "ocid": ocid, "date": getAPIDateForXDaysAgo(offset)});
 const fetchCharacterStat = async (ocid: Ocid) => getFromProxy<OpenAPIStatResponse>({'path': STAT_PATH, "ocid": ocid, "date": getAPIDate()});
 
+// Helper to build dynamic CORS headers
+function buildCORSHeaders(origin: string) {
+  return {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+    "Access-Control-Allow-Headers": "*",
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Max-Age": "86400"
+  };
+}
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-  "Access-Control-Allow-Headers": "*",
-  "Access-Control-Max-Age": "86400"
-};
+const allowedOrigins = [
+    "https://localhost:8080",
+    "https://extension-files.twitch.tv",
+    "https://vgxcnnkl2o4t2k8fbdrqszhbphh9pc.ext-twitch.tv"
+];
 
 export default async function handler(req: Request): Promise<Response> {
+    const origin = req.headers.get("origin") || "";
+
+    console.log(origin)
+    // ✅ Handle preflight request
+    if (req.method === "OPTIONS") {
+        const corsHeaders = allowedOrigins.includes(origin)
+        ? buildCORSHeaders(origin)
+        : { "Access-Control-Allow-Origin": "null" };
+
+        return new Response(null, {
+        status: 204,
+        headers: corsHeaders
+        });
+    }
+
     const { searchParams } = new URL(req.url, `http://localhost`);
   
     const characterName = searchParams.get("character_name");
-    const allowedOrigins = [
-        "https://localhost:8080",
-        "https://extension-files.twitch.tv",
-        "https://vgxcnnkl2o4t2k8fbdrqszhbphh9pc.ext-twitch.tv"
-    ];
-      
-    const origin = req.headers.get("origin");
-    console.log(origin)
-      
     if (!origin || !allowedOrigins.some(o => origin.startsWith(o))) {
         return new Response(JSON.stringify({ error: "Forbidden" }), {
             status: 403,
             headers: {
                 "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "null" // block
+                ...buildCORSHeaders(origin)
             }
         });
     }
@@ -52,8 +67,8 @@ export default async function handler(req: Request): Promise<Response> {
         return new Response(JSON.stringify({ error: "Bad request params" }), {
             status: 400,
             headers: { 
-                "Content-Type": "application/json", 
-                "Access-Control-Allow-Origin": origin 
+                "Content-Type": "application/json",
+                ...buildCORSHeaders(origin)
             },
         });
     }
@@ -125,7 +140,7 @@ export default async function handler(req: Request): Promise<Response> {
         status: 200,
         headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": origin,
+            ...buildCORSHeaders(origin),
             'Cache-Control': `s-maxage=${ttl}, stale-while-revalidate=60`
         },
     });
@@ -136,7 +151,7 @@ function handleError(error: AppError, origin: string) {
         status: error.status,
         headers: {
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": origin // block
+            ...buildCORSHeaders(origin)
         }
     });
 }
