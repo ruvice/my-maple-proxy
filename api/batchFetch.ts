@@ -18,6 +18,22 @@ const fetchCharacterEXP = async (ocid: Ocid, offset: number) =>
 const fetchCharacterStat = async (ocid: Ocid) => getFromProxy<OpenAPIStatResponse>({'path': STAT_PATH, "ocid": ocid, "date": getAPIDate()});
 
 export default async function handler(req: Request): Promise<Response> {
+    
+      
+    const origin = req.headers.get("origin") || req.headers.get("referer");
+    // 👇 Handle CORS preflight
+    if (req.method === "OPTIONS") {
+        return new Response(null, {
+        status: 204,
+        headers: {
+            "Access-Control-Allow-Origin": origin ?? "*",
+            "Access-Control-Allow-Methods": "GET,OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Max-Age": "86400"
+        },
+        });
+    }
+
     const { searchParams } = new URL(req.url, `http://localhost`);
   
     const characterName = searchParams.get("character_name");
@@ -26,8 +42,6 @@ export default async function handler(req: Request): Promise<Response> {
         "https://extension-files.twitch.tv",
         "https://vgxcnnkl2o4t2k8fbdrqszhbphh9pc.ext-twitch.tv"
     ];
-      
-    const origin = req.headers.get("origin") || req.headers.get("referer");
     console.log(origin)
     console.log(req.headers)
       
