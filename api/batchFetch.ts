@@ -18,18 +18,6 @@ const fetchCharacterEXP = async (ocid: Ocid, offset: number) =>
 const fetchCharacterStat = async (ocid: Ocid) => getFromProxy<OpenAPIStatResponse>({'path': STAT_PATH, "ocid": ocid, "date": getAPIDate()});
 
 export default async function handler(req: Request): Promise<Response> {
-    if (req.method === "OPTIONS") {
-        const origin = req.headers.get("origin");
-        return new Response(null, {
-            status: 204,
-            headers: {
-            "Access-Control-Allow-Origin": origin ?? "*",
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-            },
-        });
-    }
-
     const { searchParams } = new URL(req.url, `http://localhost`);
   
     const characterName = searchParams.get("character_name");
@@ -56,7 +44,7 @@ export default async function handler(req: Request): Promise<Response> {
             status: 400,
             headers: { 
                 "Content-Type": "application/json", 
-                "Access-Control-Allow-Origin": origin 
+                // "Access-Control-Allow-Origin": origin 
             },
         });
     }
@@ -128,7 +116,7 @@ export default async function handler(req: Request): Promise<Response> {
         status: 200,
         headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": origin,
+            // "Access-Control-Allow-Origin": origin,
             'Cache-Control': `s-maxage=${ttl}, stale-while-revalidate=60`
         },
     });
@@ -139,7 +127,7 @@ function handleError(error: AppError, origin: string) {
         status: error.status,
         headers: {
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": origin // block
+            // "Access-Control-Allow-Origin": origin // block
         }
     });
 }
