@@ -1,7 +1,8 @@
-import { MapleSymbolResponse } from "../../equipmentTypes";
-import { OpenAPICharacterBasicResponse, OpenAPIItemEquipmentResponse, OpenAPIStatResponse, OpenAPISymbolEquipmentResponse, StatResponse } from "../../models/apiTypes";
-import { Equipment } from "../../models/maple/Equipment/equipmentTypes";
-import { BasicCharacterInfo, ItemEquipInfo, MapleSymbol, Stat, StatInfo, SymbolInfo } from "../../models/maple/mapleModels";
+import { 
+    MapleSymbolResponse, Equipment, BasicCharacterInfo, ItemEquipInfo, MapleSymbol, Stat, StatInfo, 
+    SymbolInfo, OpenAPICharacterBasicResponse, OpenAPIItemEquipmentResponse, OpenAPIStatResponse, 
+    OpenAPISymbolEquipmentResponse, StatResponse  
+} from "@ruvice/my-maple-models";
 import { toNum, toBool } from "./apiDataTypeHelper";
 import { CharacterClassMapping } from "./constants";
 import { parseEquip } from "./parsers/equipmentParser";

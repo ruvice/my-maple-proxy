@@ -1,5 +1,4 @@
-import { ItemEquipmentSlot } from "../../models/maple/Equipment/equipmentTypes"
-import { CharacterClass, Potential } from "../../models/maple/Generic/enums"
+import { CharacterClass, Potential, ItemEquipmentSlot } from "@ruvice/my-maple-models"
 
 export const ItemEquipmentSlotMapping: Record<string, ItemEquipmentSlot> = {
     "ring1" : ItemEquipmentSlot.Ring1,

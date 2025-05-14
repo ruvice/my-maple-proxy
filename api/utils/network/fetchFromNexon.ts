@@ -1,4 +1,4 @@
-import { Ocid, OpenAPIOcidQueryResponse } from "../../../models/apiTypes";
+import { Ocid, OpenAPIOcidQueryResponse } from "@ruvice/my-maple-models";
 import { AppError, ErrorCode } from "./AppError";
 export type ProxyOCIDRequest = {
     characterName: string;
@@ -75,7 +75,7 @@ export const getFromProxy = async <T>(params: ProxyRequest) => {
             throw new Error(`Nexon API error ${response.status}: ${errorText}`);
         }
         const data: T = await response.json()
-        console.log(data)
+        // console.log(data)
         return data;
     } catch (err) {
         throw err;

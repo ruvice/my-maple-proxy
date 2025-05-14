@@ -1,6 +1,8 @@
-import { ItemTotalOptionResponse, ItemBaseOptionResponse, ItemExceptionalOptionResponse, ItemAddOptionResponse, ItemEtcOptionResponse, ItemStarForceOptionResponse, EquipmentResponse } from "../../../equipmentTypes"
-import { Equipment } from "../../../models/maple/Equipment/equipmentTypes";
-import { ItemTotalOption, ItemBaseOption, ItemExceptionalOption, ItemAddOption, ItemEtcOption, ItemStarForceOption } from "../../../models/maple/Equipment/options"
+import { 
+    ItemTotalOptionResponse, ItemBaseOptionResponse, ItemExceptionalOptionResponse, ItemAddOptionResponse, ItemEtcOptionResponse, 
+    ItemStarForceOptionResponse, EquipmentResponse, Equipment, ItemTotalOption, ItemBaseOption, ItemExceptionalOption, ItemAddOption, 
+    ItemEtcOption, ItemStarForceOption 
+} from "@ruvice/my-maple-models"
 import { toBool, toNum } from "../apiDataTypeHelper"
 import { ItemEquipmentSlotMapping, PotentialMapping } from "../constants";
 

@@ -1,7 +1,7 @@
-import { Ocid, OpenAPIStatResponse, OpenAPICharacterBasicResponse, OpenAPIItemEquipmentResponse, OpenAPIOcidQueryResponse, OpenAPISymbolEquipmentResponse, ExpData } from "../models/apiTypes"
-import { Character } from "../models/maple/mapleModels";
+import { Ocid, OpenAPIStatResponse, OpenAPICharacterBasicResponse, OpenAPIItemEquipmentResponse, OpenAPIOcidQueryResponse, OpenAPISymbolEquipmentResponse, ExpData } from "@ruvice/my-maple-models"
+import { Character } from "@ruvice/my-maple-models";
 import { parseBasicRes, parseEquipRes, parseStatRes, parseSymbolRes } from "./utils/apiResponseParser";
-import { AppError, ErrorCode } from "./utils/network/AppError";
+import { AppError } from "./utils/network/AppError";
 import { getFromProxy, getOCID, ProxyOCIDRequest } from "./utils/network/fetchFromNexon";
 import { delay, getAPIDate, getAPIDateForXDaysAgo, getNext2amSGTEpoch } from "./utils/network/helper";
 
@@ -16,50 +16,24 @@ const fetchCharacterSymbol = async (ocid: Ocid) => getFromProxy<OpenAPISymbolEqu
 const fetchCharacterEXP = async (ocid: Ocid, offset: number) => 
    getFromProxy<OpenAPICharacterBasicResponse>({'path': BASIC_PATH, "ocid": ocid, "date": getAPIDateForXDaysAgo(offset)});
 const fetchCharacterStat = async (ocid: Ocid) => getFromProxy<OpenAPIStatResponse>({'path': STAT_PATH, "ocid": ocid, "date": getAPIDate()});
-
-// Helper to build dynamic CORS headers
-function buildCORSHeaders(origin: string) {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-    "Access-Control-Allow-Headers": "*",
-    "Access-Control-Allow-Credentials": "true",
-    "Access-Control-Max-Age": "86400"
-  };
-}
-
-const allowedOrigins = [
-    "https://localhost:8080",
-    "https://extension-files.twitch.tv",
-    "https://vgxcnnkl2o4t2k8fbdrqszhbphh9pc.ext-twitch.tv"
-];
-
 export default async function handler(req: Request): Promise<Response> {
-    const origin = req.headers.get("origin") || "";
-
-    console.log(origin)
-    // ✅ Handle preflight request
-    if (req.method === "OPTIONS") {
-        const corsHeaders = allowedOrigins.includes(origin)
-        ? buildCORSHeaders(origin)
-        : { "Access-Control-Allow-Origin": "null" };
-
-        return new Response(null, {
-        status: 204,
-        headers: corsHeaders
-        });
-    }
-
     const { searchParams } = new URL(req.url, `http://localhost`);
   
     const characterName = searchParams.get("character_name");
-    // if (!origin || !allowedOrigins.some(o => origin.startsWith(o))) {
-    if (!origin) {
+    const allowedOrigins = [
+        "https://localhost:8080",
+        "https://extension-files.twitch.tv",
+        "https://vgxcnnkl2o4t2k8fbdrqszhbphh9pc.ext-twitch.tv"
+    ];
+      
+    const origin = req.headers.get("origin");
+      
+    if (!origin || !allowedOrigins.some(o => origin.startsWith(o))) {
         return new Response(JSON.stringify({ error: "Forbidden" }), {
             status: 403,
             headers: {
                 "Content-Type": "application/json",
-                ...buildCORSHeaders(origin)
+                "Access-Control-Allow-Origin": "null" // block
             }
         });
     }
@@ -68,8 +42,8 @@ export default async function handler(req: Request): Promise<Response> {
         return new Response(JSON.stringify({ error: "Bad request params" }), {
             status: 400,
             headers: { 
-                "Content-Type": "application/json",
-                ...buildCORSHeaders(origin)
+                "Content-Type": "application/json", 
+                "Access-Control-Allow-Origin": origin 
             },
         });
     }
@@ -141,7 +115,7 @@ export default async function handler(req: Request): Promise<Response> {
         status: 200,
         headers: { 
             "Content-Type": "application/json",
-            ...buildCORSHeaders(origin),
+            "Access-Control-Allow-Origin": origin,
             'Cache-Control': `s-maxage=${ttl}, stale-while-revalidate=60`
         },
     });
@@ -152,12 +126,11 @@ function handleError(error: AppError, origin: string) {
         status: error.status,
         headers: {
             "Content-Type": "application/json",
-            ...buildCORSHeaders(origin)
+            "Access-Control-Allow-Origin": origin // block
         }
     });
 }
 
 export const config = {
     runtime: "edge",
-    methods: ["GET", "POST", "OPTIONS"]
 };
