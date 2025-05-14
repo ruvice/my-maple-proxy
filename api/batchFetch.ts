@@ -25,7 +25,7 @@ export default async function handler(req: Request): Promise<Response> {
         "https://vgxcnnkl2o4t2k8fbdrqszhbphh9pc.ext-twitch.tv"
     ];
       
-    const origin = req.headers.get("origin") || req.headers.get("referer");
+    const origin = req.headers.get("origin");
       
     if (!origin || !allowedOrigins.some(o => origin.startsWith(o))) {
         return new Response(JSON.stringify({ error: "Forbidden" }), {
