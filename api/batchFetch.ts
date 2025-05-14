@@ -158,4 +158,5 @@ function handleError(error: AppError, origin: string) {
 
 export const config = {
     runtime: "edge",
+    methods: ["GET", "POST", "OPTIONS"]
 };
