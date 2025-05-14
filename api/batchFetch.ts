@@ -30,6 +30,8 @@ export default async function handler(req: Request): Promise<Response> {
     const origin = req.headers.get("origin") || req.headers.get("referer");
       
     if (!origin || !allowedOrigins.some(o => origin.startsWith(o))) {
+        console.log(origin)
+        console.log(req.headers)
         return new Response(JSON.stringify({ error: "Forbidden" }), {
             status: 403,
             headers: {
