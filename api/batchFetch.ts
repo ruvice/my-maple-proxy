@@ -56,7 +56,7 @@ export default async function handler(req: Request): Promise<Response> {
             status: 400,
             headers: { 
                 "Content-Type": "application/json", 
-                // "Access-Control-Allow-Origin": origin 
+                "Access-Control-Allow-Origin": origin 
             },
         });
     }
