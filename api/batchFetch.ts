@@ -21,6 +21,18 @@ export default async function handler(req: Request): Promise<Response> {
     const { searchParams } = new URL(req.url, `http://localhost`);
   
     const characterName = searchParams.get("character_name");
+    const origin = req.headers.get("origin") ?? "*";
+
+    if (req.method === "OPTIONS") {
+        return new Response(null, {
+            status: 204,
+            headers: {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+            },
+        });
+    }
     // const allowedOrigins = [
     //     "https://localhost:8080",
     //     "https://extension-files.twitch.tv",
@@ -116,7 +128,7 @@ export default async function handler(req: Request): Promise<Response> {
         status: 200,
         headers: { 
             "Content-Type": "application/json",
-            // "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Origin": origin,
             'Cache-Control': `s-maxage=${ttl}, stale-while-revalidate=60`
         },
     });
@@ -127,7 +139,7 @@ function handleError(error: AppError, origin: string) {
         status: error.status,
         headers: {
             "Content-Type": "application/json",
-            // "Access-Control-Allow-Origin": origin // block
+            "Access-Control-Allow-Origin": origin // block
         }
     });
 }
