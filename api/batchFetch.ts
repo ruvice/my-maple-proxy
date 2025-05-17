@@ -3,19 +3,19 @@ import { Character } from "@ruvice/my-maple-models";
 import { parseBasicRes, parseEquipRes, parseStatRes, parseSymbolRes } from "./utils/apiResponseParser";
 import { AppError } from "./utils/network/AppError";
 import { getFromProxy, getOCID, ProxyOCIDRequest } from "./utils/network/fetchFromNexon";
-import { delay, getAPIDate, getAPIDateForXDaysAgo, getNext2amSGTEpoch } from "./utils/network/helper";
+import { delay, getAPIDate, getAPIDateForXDaysAgo, getCurrentDateTimeInSGT, getNext2amSGTEpoch } from "./utils/network/helper";
 
 const BASIC_PATH = "maplestorysea/v1/character/basic";
 const ITEM_PATH = "maplestorysea/v1/character/item-equipment";
 const SYMBOL_PATH = "maplestorysea/v1/character/symbol-equipment";
 const STAT_PATH = "maplestorysea/v1/character/stat";
 
-const fetchCharacterBasic = async (ocid: Ocid) => getFromProxy<OpenAPICharacterBasicResponse>({'path': BASIC_PATH, "ocid": ocid, "date": getAPIDate()});
-const fetchCharacterItemEquip = async (ocid: Ocid) => getFromProxy<OpenAPIItemEquipmentResponse>({'path': ITEM_PATH, "ocid": ocid, "date": getAPIDate()});
-const fetchCharacterSymbol = async (ocid: Ocid) => getFromProxy<OpenAPISymbolEquipmentResponse>({'path': SYMBOL_PATH, "ocid": ocid, "date": getAPIDate()});
+const fetchCharacterBasic = async (ocid: Ocid) => getFromProxy<OpenAPICharacterBasicResponse>({'path': BASIC_PATH, "ocid": ocid});
+const fetchCharacterItemEquip = async (ocid: Ocid) => getFromProxy<OpenAPIItemEquipmentResponse>({'path': ITEM_PATH, "ocid": ocid});
+const fetchCharacterSymbol = async (ocid: Ocid) => getFromProxy<OpenAPISymbolEquipmentResponse>({'path': SYMBOL_PATH, "ocid": ocid});
 const fetchCharacterEXP = async (ocid: Ocid, offset: number) => 
    getFromProxy<OpenAPICharacterBasicResponse>({'path': BASIC_PATH, "ocid": ocid, "date": getAPIDateForXDaysAgo(offset)});
-const fetchCharacterStat = async (ocid: Ocid) => getFromProxy<OpenAPIStatResponse>({'path': STAT_PATH, "ocid": ocid, "date": getAPIDate()});
+const fetchCharacterStat = async (ocid: Ocid) => getFromProxy<OpenAPIStatResponse>({'path': STAT_PATH, "ocid": ocid});
 export default async function handler(req: Request): Promise<Response> {
     const { searchParams } = new URL(req.url, `http://localhost`);
   
@@ -73,7 +73,7 @@ export default async function handler(req: Request): Promise<Response> {
     if (!(basicRes instanceof AppError)) {
         character.basic = parseBasicRes(basicRes)
         const expData: ExpData = {
-            date: basicRes.date,
+            date: getCurrentDateTimeInSGT(),
             exp: basicRes.character_exp,
             exp_rate: basicRes.character_exp_rate
         };
@@ -109,7 +109,7 @@ export default async function handler(req: Request): Promise<Response> {
 
     const targetEpoch = getNext2amSGTEpoch(); // your desired expiry
     const now = Math.floor(Date.now() / 1000);
-    const ttl = Math.max(0, targetEpoch - now);
+    const ttl = 20 * 60;
 
     return new Response(JSON.stringify(character), {
         status: 200,

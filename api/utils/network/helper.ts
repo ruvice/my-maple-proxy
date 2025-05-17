@@ -31,9 +31,9 @@ export function getAPIDateForXDaysAgo(offset: number): string {
     const hourSGT = sgtTime.getUTCHours(); // already offset to SGT
     // If it's before 2am in SGT, use 2 days ago, else we want previous day
     if (hourSGT < 2) {
-        sgtTime.setDate(sgtTime.getDate() - 2 - offset);
-    } else {
         sgtTime.setDate(sgtTime.getDate() - 1 - offset);
+    } else {
+        sgtTime.setDate(sgtTime.getDate() - offset);
     }
 
     const year = sgtTime.getUTCFullYear();
@@ -67,4 +67,27 @@ export function getNext2amSGTEpoch(): number {
 
     // Epoch seconds
     return Math.floor(next2amUTC.getTime() / 1000);
+}
+
+export function getCurrentDateTimeInSGT(): string {
+    const now = new Date();
+
+    // Convert to SGT (UTC+8)
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const sgt = new Date(utc + 8 * 60 * 60000);
+
+    // Roll back one day if before 2AM SGT
+    if (sgt.getHours() < 2) {
+        sgt.setDate(sgt.getDate() - 1);
+    }
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const year = sgt.getFullYear();
+    const month = pad(sgt.getMonth() + 1);
+    const day = pad(sgt.getDate());
+    const hours = pad(sgt.getHours());
+    const minutes = pad(sgt.getMinutes());
+
+    return `${year}-${month}-${day}T${hours}:${minutes}+08:00`;
 }

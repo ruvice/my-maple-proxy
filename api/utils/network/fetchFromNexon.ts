@@ -7,7 +7,7 @@ export type ProxyOCIDRequest = {
 export type ProxyRequest = {
     ocid: Ocid;
     path: string;
-    date: string;
+    date?: string;
 }
 
 const OCID_PATH = "maplestorysea/v1/id";
@@ -50,7 +50,9 @@ export const getFromProxy = async <T>(params: ProxyRequest) => {
     const date = params.date;
     const url = new URL(`https://open.api.nexon.com/${path}`);
     url.searchParams.set("ocid", ocid);
-    url.searchParams.set("date", date);
+    if (date) {
+        url.searchParams.set("date", date);
+    }
     console.log(url.toString())
 
     const apiKey = process.env.OPEN_API_KEY;
@@ -61,11 +63,7 @@ export const getFromProxy = async <T>(params: ProxyRequest) => {
     if (!ocid) {
         return new AppError(ErrorCode.INVALID_OCID, 400)
     }
-
-    if (!date) {
-        return new AppError(ErrorCode.INVALID_DATE, 400)
-    }
-
+    
     try {
         const response = await fetch(url.toString(), {
             headers: { "x-nxopen-api-key": apiKey }
