@@ -1,16 +1,35 @@
 import { 
     ItemTotalOptionResponse, ItemBaseOptionResponse, ItemExceptionalOptionResponse, ItemAddOptionResponse, ItemEtcOptionResponse, 
     ItemStarForceOptionResponse, EquipmentResponse, Equipment, ItemTotalOption, ItemBaseOption, ItemExceptionalOption, ItemAddOption, 
-    ItemEtcOption, ItemStarForceOption 
+    ItemEtcOption, ItemStarForceOption, MapleServer
 } from "@ruvice/my-maple-models"
 import { toBool, toNum } from "../apiDataTypeHelper"
-import { ItemEquipmentSlotMapping, PotentialMapping } from "../constants";
+import { ItemEquipmentSlotMappingSEA, ItemEquipmentSlotMappingKMS, PotentialMappingSEA, PotentialMappingKMS } from "../constants";
 
-export function parseEquip(res: EquipmentResponse): Equipment {
-    const normalisedEquipmentSlot = res.item_equipment_slot.toLowerCase().replace(/\s+/g, '');
-    const itemEquipmentSlot = ItemEquipmentSlotMapping[normalisedEquipmentSlot]
-    const itemPotential = PotentialMapping[res.potential_option_grade]
-    const addItemPotential = PotentialMapping[res.additional_potential_option_grade]
+function getItemEquipmentSlot(itemEquipmentSlot: string, server: MapleServer) {
+    if (server === MapleServer.KMS) {
+        return ItemEquipmentSlotMappingKMS[itemEquipmentSlot]
+    } else if (server === MapleServer.SEA) {
+        const normalisedEquipmentSlot = itemEquipmentSlot.toLowerCase().replace(/\s+/g, '');
+        return ItemEquipmentSlotMappingSEA[normalisedEquipmentSlot]
+    }
+    const normalisedEquipmentSlot = itemEquipmentSlot.toLowerCase().replace(/\s+/g, '');
+    return ItemEquipmentSlotMappingSEA[normalisedEquipmentSlot]
+}
+
+function getItemPotential(potentialString: string, server: MapleServer) {
+    if (server === MapleServer.KMS) {
+        return PotentialMappingKMS[potentialString]
+    } else if (server === MapleServer.SEA) {
+        return PotentialMappingSEA[potentialString]
+    }
+    return PotentialMappingSEA[potentialString]
+}
+
+export function parseEquip(res: EquipmentResponse, server: MapleServer): Equipment {
+    const itemEquipmentSlot = getItemEquipmentSlot(res.item_equipment_slot, server)
+    const itemPotential = getItemPotential(res.potential_option_grade, server)
+    const addItemPotential = getItemPotential(res.additional_potential_option_grade, server)
     const itemTotalOption = parseItemTotalOption(res.item_total_option)
     const itemBaseOption = parseItemBaseOption(res.item_base_option)
     const itemExceptionalOption = parseItemExceptionalOption(res.item_exceptional_option)

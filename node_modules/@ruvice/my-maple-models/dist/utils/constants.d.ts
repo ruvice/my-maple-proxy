@@ -1,0 +1,10 @@
+import { ItemEquipOption, SymbolEquipOption } from "../models/maple/Equipment/equipmentTypes";
+import { CharacterClass, StatName } from "../models/maple/Generic/enums";
+export declare const CharacterClassLocalisationSEA: Record<CharacterClass, string>;
+export declare const CharacterClassLocalisationKMS: Record<CharacterClass, string>;
+export declare const ITEM_EQUIP_STAT_OPTIONS_SEA: Record<ItemEquipOption, string>;
+export declare const ITEM_EQUIP_STAT_OPTIONS_KMS: Record<ItemEquipOption, string>;
+export declare const SYMBOL_OPTIONS_SEA: Record<SymbolEquipOption, string>;
+export declare const SYMBOL_OPTIONS_KMS: Record<SymbolEquipOption, string>;
+export declare const STAT_SEA: Record<StatName, string>;
+export declare const STAT_KMS: Record<StatName, string>;
