@@ -1,10 +1,15 @@
+import { MapleServer } from "@ruvice/my-maple-models";
+import { toMapleServer } from "./utils/constants";
 import { getNext2amSGTEpoch } from "./utils/network/helper";
 
 export default async function handler(req: Request): Promise<Response> {
     const { searchParams } = new URL(req.url, `http://localhost`) || req.headers.get("referer");;
   
     const path = searchParams.get("path");
-    const apiKey = process.env.OPEN_API_KEY;
+    const serverParam = searchParams.get("server") ?? 'SEA';
+    const server = toMapleServer(serverParam);
+    const apiKey = server === MapleServer.KMS ? process.env.KMS_OPEN_API_KEY : process.env.SEA_OPEN_API_KEY;
+    const serverPath = server === MapleServer.KMS ? 'maplestory/' : 'maplestorysea/'
     const domain = 'https://open.api.nexon.com'
     const allowedOrigins = [
         "https://localhost:8080",
@@ -34,11 +39,14 @@ export default async function handler(req: Request): Promise<Response> {
         });
     }
   
-    const url = new URL(`${domain}/${path}`);
+    const url = new URL(`${domain}/${serverPath + path}`);
+    console.log(searchParams)
     for (const [key, value] of searchParams.entries()) {
-      if (key !== "path") url.searchParams.append(key, value);
+        if (key !== "path" && key !== "server") {
+            url.searchParams.append(key, value);
+        }
     }
-    console.log(url)
+    console.log(url.toString())
     const response = await fetch(url.toString(), {
       headers: { "x-nxopen-api-key": apiKey },
     });
