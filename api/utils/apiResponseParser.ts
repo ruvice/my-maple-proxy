@@ -1,14 +1,52 @@
 import { 
     MapleSymbolResponse, Equipment, BasicCharacterInfo, ItemEquipInfo, MapleSymbol, Stat, StatInfo, 
     SymbolInfo, OpenAPICharacterBasicResponse, OpenAPIItemEquipmentResponse, OpenAPIStatResponse, 
-    OpenAPISymbolEquipmentResponse, StatResponse  
+    OpenAPISymbolEquipmentResponse, StatResponse, MapleServer,
+    SymbolRegion
 } from "@ruvice/my-maple-models";
 import { toNum, toBool } from "./apiDataTypeHelper";
-import { CharacterClassMapping } from "./constants";
+import { CharacterClassMappingSEA, CharacterClassMappingKMS, StatMappingKMS, StatMappingSEA } from "./constants";
 import { parseEquip } from "./parsers/equipmentParser";
 
-export function parseBasicRes(res: OpenAPICharacterBasicResponse): BasicCharacterInfo {
-    const characterClass = CharacterClassMapping[res.character_class]
+
+function getCharacterClass(characterClass: string, server: MapleServer) {
+    if (server === MapleServer.KMS) {
+        return CharacterClassMappingKMS[characterClass]
+    } else if (server === MapleServer.SEA) {
+        return CharacterClassMappingSEA[characterClass]
+    }
+    return CharacterClassMappingSEA[characterClass]
+}
+
+function getStatName(statName: string, server: MapleServer) {
+    if (server === MapleServer.KMS) {
+        return StatMappingKMS[statName]
+    } else if (server === MapleServer.SEA) {
+        return StatMappingSEA[statName]
+    }
+    return StatMappingSEA[statName]
+}
+
+function getSymbolRegion(name: string, server: MapleServer) {
+    if (server === MapleServer.KMS) {
+        if (name.includes("아케인심볼")) {
+            return SymbolRegion.Arcane
+        } else if (name.includes("어센틱심볼 ")) {
+            return SymbolRegion.Grandis
+        }
+    } else if (server === MapleServer.SEA) {
+        if (name.toLowerCase().includes("arcane")) {
+            return SymbolRegion.Arcane
+        } else if (name.toLowerCase().includes("authentic")) {
+            return SymbolRegion.Grandis
+        }
+    }
+    return SymbolRegion.Arcane
+}
+
+export function parseBasicRes(res: OpenAPICharacterBasicResponse, server: MapleServer): BasicCharacterInfo {
+    
+    const characterClass = getCharacterClass(res.character_class, server)
     return {
         date: res.date,
         character_name: res.character_name,
@@ -27,14 +65,14 @@ export function parseBasicRes(res: OpenAPICharacterBasicResponse): BasicCharacte
     }
 }
 
-export function parseEquipRes(res: OpenAPIItemEquipmentResponse): ItemEquipInfo {
-    const itemEquipment: Equipment[] = res.item_equipment.map((equip) => parseEquip(equip))
-    const itemEquipmentPreset1: Equipment[] = res.item_equipment_preset_1.map((equip) => parseEquip(equip))
-    const itemEquipmentPreset2: Equipment[] = res.item_equipment_preset_2.map((equip) => parseEquip(equip))
-    const itemEquipmentPreset3: Equipment[] = res.item_equipment_preset_3.map((equip) => parseEquip(equip))
-    const dragonEquipment: Equipment[] = res.dragon_equipment.map((equip) => parseEquip(equip))
-    const mechanicEquipment: Equipment[] = res.mechanic_equipment.map((equip) => parseEquip(equip))
-    const characterClass = CharacterClassMapping[res.character_class]
+export function parseEquipRes(res: OpenAPIItemEquipmentResponse, server: MapleServer): ItemEquipInfo {
+    const itemEquipment: Equipment[] = res.item_equipment.map((equip) => parseEquip(equip, server))
+    const itemEquipmentPreset1: Equipment[] = res.item_equipment_preset_1.map((equip) => parseEquip(equip, server))
+    const itemEquipmentPreset2: Equipment[] = res.item_equipment_preset_2.map((equip) => parseEquip(equip, server))
+    const itemEquipmentPreset3: Equipment[] = res.item_equipment_preset_3.map((equip) => parseEquip(equip, server))
+    const dragonEquipment: Equipment[] = res.dragon_equipment.map((equip) => parseEquip(equip, server))
+    const mechanicEquipment: Equipment[] = res.mechanic_equipment.map((equip) => parseEquip(equip, server))
+    const characterClass = getCharacterClass(res.character_class, server)
     return {
         date: res.date,
         character_gender: res.character_gender,
@@ -50,9 +88,9 @@ export function parseEquipRes(res: OpenAPIItemEquipmentResponse): ItemEquipInfo 
     }
 }
 
-export function parseSymbolRes(res: OpenAPISymbolEquipmentResponse): SymbolInfo {
-    const symbol: MapleSymbol[] = res.symbol.map((symbol) => parseSymbol(symbol))
-    const characterClass = CharacterClassMapping[res.character_class]
+export function parseSymbolRes(res: OpenAPISymbolEquipmentResponse, server: MapleServer): SymbolInfo {
+    const symbol: MapleSymbol[] = res.symbol.map((symbol) => parseSymbol(symbol, server))
+    const characterClass = getCharacterClass(res.character_class, server)
     return {
         date: "",
         character_class: characterClass,
@@ -60,7 +98,8 @@ export function parseSymbolRes(res: OpenAPISymbolEquipmentResponse): SymbolInfo 
     }
 }
 
-function parseSymbol(symbol: MapleSymbolResponse): MapleSymbol {
+function parseSymbol(symbol: MapleSymbolResponse, server: MapleServer): MapleSymbol {
+    const symbolRegion = getSymbolRegion(symbol.symbol_name, server)
     return {
         symbol_name: symbol.symbol_name,
         symbol_icon: symbol.symbol_icon,
@@ -76,13 +115,15 @@ function parseSymbol(symbol: MapleSymbolResponse): MapleSymbol {
         symbol_meso_rate: symbol.symbol_meso_rate,
         symbol_exp_rate: symbol.symbol_exp_rate,
         symbol_growth_count: toNum(symbol.symbol_growth_count),
-        symbol_require_growth_count: toNum(symbol.symbol_require_growth_count)
+        symbol_require_growth_count: toNum(symbol.symbol_require_growth_count),
+        region: symbolRegion
     }
 }
 
-export function parseStatRes(res: OpenAPIStatResponse): StatInfo {
-    const characterClass = CharacterClassMapping[res.character_class]
-    const finalStat = res.final_stat.map((stat) => parseStat(stat))
+export function parseStatRes(res: OpenAPIStatResponse, server: MapleServer): StatInfo {
+    const characterClass = getCharacterClass(res.character_class, server)
+    const finalStat = res.final_stat.map((stat) => parseStat(stat, server))
+    console.log(res)
     return {
         date: res.date,
         character_class: characterClass,
@@ -91,9 +132,10 @@ export function parseStatRes(res: OpenAPIStatResponse): StatInfo {
     }
 }
 
-function parseStat(stat: StatResponse): Stat {
+function parseStat(stat: StatResponse, server: MapleServer): Stat {
+    const statName = getStatName(stat.stat_name, server)
     return {
-        stat_name: stat.stat_name,
+        stat_name: statName,
         stat_value: toNum(stat.stat_value)
     }
 }

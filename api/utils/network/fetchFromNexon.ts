@@ -1,23 +1,26 @@
-import { Ocid, OpenAPIOcidQueryResponse } from "@ruvice/my-maple-models";
+import { MapleServer, Ocid, OpenAPIOcidQueryResponse } from "@ruvice/my-maple-models";
 import { AppError, ErrorCode } from "./AppError";
 export type ProxyOCIDRequest = {
     characterName: string;
+    server: MapleServer;
 }
 
 export type ProxyRequest = {
     ocid: Ocid;
     path: string;
     date?: string;
+    server: MapleServer
 }
 
-const OCID_PATH = "maplestorysea/v1/id";
+const OCID_PATH = "v1/id";
 
 export const getOCID = async <T>(params: ProxyOCIDRequest) => {
-    const url = new URL(`https://open.api.nexon.com/${OCID_PATH}`);
-    const characterName = params.characterName;
+    const { characterName, server } = params;
+    const apiKey = server === MapleServer.KMS ? process.env.KMS_OPEN_API_KEY : process.env.SEA_OPEN_API_KEY;
+    const serverPath = server === MapleServer.KMS ? 'maplestory/' : 'maplestorysea/'
+    const url = new URL(`https://open.api.nexon.com/${serverPath + OCID_PATH}`);
     url.searchParams.set("character_name", characterName)
     console.log(url.toString())
-    const apiKey = process.env.OPEN_API_KEY;
     if (!apiKey) {
         throw new AppError(ErrorCode.MISSING_API_KEY, 500)
     }
@@ -45,17 +48,16 @@ export const getOCID = async <T>(params: ProxyOCIDRequest) => {
 }
 
 export const getFromProxy = async <T>(params: ProxyRequest) => {
-    const path = params.path;
-    const ocid = params.ocid;
-    const date = params.date;
-    const url = new URL(`https://open.api.nexon.com/${path}`);
+    const { path, ocid,  date, server } = params;
+    const apiKey = server === MapleServer.KMS ? process.env.KMS_OPEN_API_KEY : process.env.SEA_OPEN_API_KEY;
+    const serverPath = server === MapleServer.KMS ? 'maplestory/' : 'maplestorysea/'
+    const url = new URL(`https://open.api.nexon.com/${serverPath + path}`);
     url.searchParams.set("ocid", ocid);
     if (date) {
         url.searchParams.set("date", date);
     }
     console.log(url.toString())
 
-    const apiKey = process.env.OPEN_API_KEY;
     if (!apiKey) {
         return new AppError(ErrorCode.MISSING_API_KEY, 500)
     }

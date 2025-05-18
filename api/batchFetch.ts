@@ -1,25 +1,28 @@
-import { Ocid, OpenAPIStatResponse, OpenAPICharacterBasicResponse, OpenAPIItemEquipmentResponse, OpenAPIOcidQueryResponse, OpenAPISymbolEquipmentResponse, ExpData } from "@ruvice/my-maple-models"
+import { Ocid, OpenAPIStatResponse, OpenAPICharacterBasicResponse, OpenAPIItemEquipmentResponse, OpenAPIOcidQueryResponse, OpenAPISymbolEquipmentResponse, ExpData, MapleServer } from "@ruvice/my-maple-models"
 import { Character } from "@ruvice/my-maple-models";
 import { parseBasicRes, parseEquipRes, parseStatRes, parseSymbolRes } from "./utils/apiResponseParser";
 import { AppError } from "./utils/network/AppError";
 import { getFromProxy, getOCID, ProxyOCIDRequest } from "./utils/network/fetchFromNexon";
 import { delay, getAPIDate, getAPIDateForXDaysAgo, getCurrentDateTimeInSGT, getNext2amSGTEpoch } from "./utils/network/helper";
+import { toMapleServer } from "./utils/constants";
 
-const BASIC_PATH = "maplestorysea/v1/character/basic";
-const ITEM_PATH = "maplestorysea/v1/character/item-equipment";
-const SYMBOL_PATH = "maplestorysea/v1/character/symbol-equipment";
-const STAT_PATH = "maplestorysea/v1/character/stat";
+const BASIC_PATH = "v1/character/basic";
+const ITEM_PATH = "v1/character/item-equipment";
+const SYMBOL_PATH = "v1/character/symbol-equipment";
+const STAT_PATH = "v1/character/stat";
 
-const fetchCharacterBasic = async (ocid: Ocid) => getFromProxy<OpenAPICharacterBasicResponse>({'path': BASIC_PATH, "ocid": ocid});
-const fetchCharacterItemEquip = async (ocid: Ocid) => getFromProxy<OpenAPIItemEquipmentResponse>({'path': ITEM_PATH, "ocid": ocid});
-const fetchCharacterSymbol = async (ocid: Ocid) => getFromProxy<OpenAPISymbolEquipmentResponse>({'path': SYMBOL_PATH, "ocid": ocid});
-const fetchCharacterEXP = async (ocid: Ocid, offset: number) => 
-   getFromProxy<OpenAPICharacterBasicResponse>({'path': BASIC_PATH, "ocid": ocid, "date": getAPIDateForXDaysAgo(offset)});
-const fetchCharacterStat = async (ocid: Ocid) => getFromProxy<OpenAPIStatResponse>({'path': STAT_PATH, "ocid": ocid});
+const fetchCharacterBasic = async (ocid: Ocid, server: MapleServer) => getFromProxy<OpenAPICharacterBasicResponse>({'path': BASIC_PATH, "ocid": ocid, "server": server});
+const fetchCharacterItemEquip = async (ocid: Ocid, server: MapleServer) => getFromProxy<OpenAPIItemEquipmentResponse>({'path': ITEM_PATH, "ocid": ocid, "server": server});
+const fetchCharacterSymbol = async (ocid: Ocid, server: MapleServer) => getFromProxy<OpenAPISymbolEquipmentResponse>({'path': SYMBOL_PATH, "ocid": ocid, "server": server});
+const fetchCharacterEXP = async (ocid: Ocid, server: MapleServer, offset: number) => 
+   getFromProxy<OpenAPICharacterBasicResponse>({'path': BASIC_PATH, "ocid": ocid, "server": server, "date": getAPIDateForXDaysAgo(offset)});
+const fetchCharacterStat = async (ocid: Ocid, server: MapleServer) => getFromProxy<OpenAPIStatResponse>({'path': STAT_PATH, "ocid": ocid, "server": server});
 export default async function handler(req: Request): Promise<Response> {
     const { searchParams } = new URL(req.url, `http://localhost`)  || req.headers.get("referer");
   
     const characterName = searchParams.get("character_name");
+    const serverParam = searchParams.get("server") ?? 'SEA';
+    const server = toMapleServer(serverParam);
     const allowedOrigins = [
         "https://localhost:8080",
         "https://extension-files.twitch.tv",
@@ -38,7 +41,7 @@ export default async function handler(req: Request): Promise<Response> {
         });
     }
   
-    if (!characterName) {
+    if (!characterName || !server) {
         return new Response(JSON.stringify({ error: "Bad request params" }), {
             status: 400,
             headers: { 
@@ -50,7 +53,8 @@ export default async function handler(req: Request): Promise<Response> {
 
     // At this point we have a valid incoming request
     const ocidRequest: ProxyOCIDRequest = {
-        characterName: characterName
+        characterName: characterName,
+        server: server
     }
     const ocidRes = await getOCID<OpenAPIOcidQueryResponse>(ocidRequest)
     if (ocidRes instanceof AppError)  {
@@ -64,14 +68,14 @@ export default async function handler(req: Request): Promise<Response> {
     }
 
     const [basicRes, equipRes, symbolRes, statRes] = await Promise.all([
-        fetchCharacterBasic(ocid),
-        fetchCharacterItemEquip(ocid),
-        fetchCharacterSymbol(ocid),
-        fetchCharacterStat(ocid)
+        fetchCharacterBasic(ocid, server),
+        fetchCharacterItemEquip(ocid, server),
+        fetchCharacterSymbol(ocid, server),
+        fetchCharacterStat(ocid, server)
     ]);
     
     if (!(basicRes instanceof AppError)) {
-        character.basic = parseBasicRes(basicRes)
+        character.basic = parseBasicRes(basicRes, server)
         const expData: ExpData = {
             date: getCurrentDateTimeInSGT(),
             exp: basicRes.character_exp,
@@ -82,20 +86,20 @@ export default async function handler(req: Request): Promise<Response> {
     }
 
     if (!(equipRes instanceof AppError)) {
-        character.equips = parseEquipRes(equipRes)
+        character.equips = parseEquipRes(equipRes, server)
     }
 
     if (!(symbolRes instanceof AppError)) {
-        character.symbol = parseSymbolRes(symbolRes)
+        character.symbol = parseSymbolRes(symbolRes, server)
     }
 
     if (!(statRes instanceof AppError)) {
-        character.stat = parseStatRes(statRes)
+        character.stat = parseStatRes(statRes, server)
     }
     
     for (let i = 1; i < 5; i++) {
         await delay(500);
-        const expRes = await fetchCharacterEXP(ocid, i);
+        const expRes = await fetchCharacterEXP(ocid, server, i);
         if (!(expRes instanceof AppError)) {
             const expData: ExpData = {
                 date: expRes.date,
