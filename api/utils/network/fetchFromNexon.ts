@@ -17,7 +17,7 @@ export const getOCID = async <T>(params: ProxyOCIDRequest) => {
     const characterName = params.characterName;
     url.searchParams.set("character_name", characterName)
     console.log(url.toString())
-    const apiKey = process.env.OPEN_API_KEY;
+    const apiKey = process.env.SEA_OPEN_API_KEY;
     if (!apiKey) {
         throw new AppError(ErrorCode.MISSING_API_KEY, 500)
     }
@@ -55,7 +55,7 @@ export const getFromProxy = async <T>(params: ProxyRequest) => {
     }
     console.log(url.toString())
 
-    const apiKey = process.env.OPEN_API_KEY;
+    const apiKey = process.env.SEA_OPEN_API_KEY;
     if (!apiKey) {
         return new AppError(ErrorCode.MISSING_API_KEY, 500)
     }
