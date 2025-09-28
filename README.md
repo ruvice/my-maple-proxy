@@ -4,7 +4,7 @@ A tiny Vercel-hosted proxy for the **NEXON Open API** (MapleStory / MapleStorySE
 It forwards requests to `https://open.api.nexon.com`, injects your API key, applies a strict CORS allow-list, and sets CDN cache headers aligned to your update cadence.
 
 > Why? So your client apps never expose an API key and you keep tight control over origins & caching.
-> Acts as a BFF
+> Acts as a BFF~
 
 ---
 
