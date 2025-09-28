@@ -1,0 +1,11 @@
+import { ItemEquipmentSlot } from "../maple/Equipment/equipmentTypes";
+import { Potential, CharacterClass, StatName, MapleServer } from "../maple/Generic/enums";
+export declare const ItemEquipmentSlotMappingSEA: Record<string, ItemEquipmentSlot>;
+export declare const ItemEquipmentSlotMappingKMS: Record<string, ItemEquipmentSlot>;
+export declare const PotentialMappingSEA: Record<string, Potential>;
+export declare const PotentialMappingKMS: Record<string, Potential>;
+export declare const CharacterClassMappingSEA: Record<string, CharacterClass>;
+export declare const CharacterClassMappingKMS: Record<string, CharacterClass>;
+export declare const StatMappingSEA: Record<string, StatName>;
+export declare const StatMappingKMS: Record<string, StatName>;
+export declare function toMapleServer(input: string): MapleServer | undefined;

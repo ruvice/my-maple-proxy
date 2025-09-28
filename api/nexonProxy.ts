@@ -1,5 +1,4 @@
-import { MapleServer } from "@ruvice/my-maple-models";
-import { toMapleServer } from "./utils/constants";
+import { MapleServer, toMapleServer } from "@ruvice/my-maple-models";
 import { getNext2amSGTEpoch } from "./utils/network/helper";
 
 export default async function handler(req: Request): Promise<Response> {
@@ -40,13 +39,12 @@ export default async function handler(req: Request): Promise<Response> {
     }
   
     const url = new URL(`${domain}/${serverPath + path}`);
-    console.log(searchParams)
     for (const [key, value] of searchParams.entries()) {
         if (key !== "path" && key !== "server") {
             url.searchParams.append(key, value);
         }
     }
-    console.log(url.toString())
+
     const response = await fetch(url.toString(), {
       headers: { "x-nxopen-api-key": apiKey },
     });

@@ -5,7 +5,7 @@ import {
     SymbolRegion
 } from "@ruvice/my-maple-models";
 import { toNum, toBool } from "./apiDataTypeHelper";
-import { CharacterClassMappingSEA, CharacterClassMappingKMS, StatMappingKMS, StatMappingSEA } from "./constants";
+import { CharacterClassMappingSEA, CharacterClassMappingKMS, StatMappingKMS, StatMappingSEA } from "@ruvice/my-maple-models";
 import { parseEquip } from "./parsers/equipmentParser";
 
 
@@ -123,7 +123,6 @@ function parseSymbol(symbol: MapleSymbolResponse, server: MapleServer): MapleSym
 export function parseStatRes(res: OpenAPIStatResponse, server: MapleServer): StatInfo {
     const characterClass = getCharacterClass(res.character_class, server)
     const finalStat = res.final_stat.map((stat) => parseStat(stat, server))
-    console.log(res)
     return {
         date: res.date,
         character_class: characterClass,
