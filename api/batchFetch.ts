@@ -1,10 +1,9 @@
 import { Ocid, OpenAPIStatResponse, OpenAPICharacterBasicResponse, OpenAPIItemEquipmentResponse, OpenAPIOcidQueryResponse, OpenAPISymbolEquipmentResponse, ExpData, MapleServer } from "@ruvice/my-maple-models"
-import { Character } from "@ruvice/my-maple-models";
+import { Character, toMapleServer } from "@ruvice/my-maple-models";
 import { parseBasicRes, parseEquipRes, parseStatRes, parseSymbolRes } from "./utils/apiResponseParser";
 import { AppError } from "./utils/network/AppError";
 import { getFromProxy, getOCID, ProxyOCIDRequest } from "./utils/network/fetchFromNexon";
 import { delay, getAPIDate, getAPIDateForXDaysAgo, getCurrentDateTimeInSGT, getNext2amSGTEpoch } from "./utils/network/helper";
-import { toMapleServer } from "./utils/constants";
 
 const BASIC_PATH = "v1/character/basic";
 const ITEM_PATH = "v1/character/item-equipment";

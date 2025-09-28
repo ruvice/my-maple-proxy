@@ -3,6 +3,6 @@
     "version": "1.0.0",
     "type": "module",
     "dependencies": {
-        "@ruvice/my-maple-models": "^0.1.13"
+        "@ruvice/my-maple-models": "^0.2.2"
     }
 }

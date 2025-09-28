@@ -20,7 +20,6 @@ export const getOCID = async <T>(params: ProxyOCIDRequest) => {
     const serverPath = server === MapleServer.KMS ? 'maplestory/' : 'maplestorysea/'
     const url = new URL(`https://open.api.nexon.com/${serverPath + OCID_PATH}`);
     url.searchParams.set("character_name", characterName)
-    console.log(url.toString())
     if (!apiKey) {
         throw new AppError(ErrorCode.MISSING_API_KEY, 500)
     }
@@ -56,7 +55,6 @@ export const getFromProxy = async <T>(params: ProxyRequest) => {
     if (date) {
         url.searchParams.set("date", date);
     }
-    console.log(url.toString())
 
     if (!apiKey) {
         return new AppError(ErrorCode.MISSING_API_KEY, 500)
@@ -65,6 +63,11 @@ export const getFromProxy = async <T>(params: ProxyRequest) => {
     if (!ocid) {
         return new AppError(ErrorCode.INVALID_OCID, 400)
     }
+
+    console.log("Logging Incoming Request", {
+        url: url,
+        query: Object.fromEntries(url.searchParams)
+    });
     
     try {
         const response = await fetch(url.toString(), {
@@ -74,8 +77,14 @@ export const getFromProxy = async <T>(params: ProxyRequest) => {
             const errorText = await response.text();
             throw new Error(`Nexon API error ${response.status}: ${errorText}`);
         }
-        const data: T = await response.json()
-        // console.log(data)
+        const resClone = response.clone();
+        const data: T = await resClone.json()
+        
+        console.log("Nexon API response", {
+            status: response.status,
+            url: url.toString(),
+            data: data,
+        });
         return data;
     } catch (err) {
         throw err;
