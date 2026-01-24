@@ -4,11 +4,31 @@ import { getNext2amSGTEpoch } from "./utils/network/helper";
 export default async function handler(req: Request): Promise<Response> {
     const { searchParams } = new URL(req.url, `http://localhost`) || req.headers.get("referer");;
   
+    // const path = searchParams.get("path");
+    // const serverParam = searchParams.get("server") ?? 'SEA';
+    // const server = toMapleServer(serverParam);
+    // const apiKey = server === MapleServer.KMS ? process.env.KMS_OPEN_API_KEY : process.env.SEA_OPEN_API_KEY;
+    // const serverPath = server === MapleServer.KMS ? 'maplestory/' : 'maplestorysea/'
     const path = searchParams.get("path");
-    const serverParam = searchParams.get("server") ?? 'SEA';
+    const serverParam = searchParams.get("server") ?? "SEA";
     const server = toMapleServer(serverParam);
-    const apiKey = server === MapleServer.KMS ? process.env.KMS_OPEN_API_KEY : process.env.SEA_OPEN_API_KEY;
-    const serverPath = server === MapleServer.KMS ? 'maplestory/' : 'maplestorysea/'
+
+    const SERVER_CONFIG: Record<MapleServer, { apiKey?: string; serverPath: string }> = {
+        [MapleServer.KMS]: {
+        apiKey: process.env.KMS_OPEN_API_KEY,
+        serverPath: "maplestory/",
+        },
+        [MapleServer.SEA]: {
+        apiKey: process.env.SEA_OPEN_API_KEY,
+        serverPath: "maplestorysea/",
+        },
+        [MapleServer.TMS]: {
+        apiKey: process.env.TMS_OPEN_API_KEY,
+        serverPath: "maplestorytw/",
+        },
+    };
+    const { apiKey, serverPath } = SERVER_CONFIG[server];
+
     const domain = 'https://open.api.nexon.com'
     const allowedOrigins = [
         "https://localhost:8080",
