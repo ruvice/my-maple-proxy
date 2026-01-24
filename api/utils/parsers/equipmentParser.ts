@@ -4,13 +4,15 @@ import {
     ItemEtcOption, ItemStarForceOption, MapleServer
 } from "@ruvice/my-maple-models"
 import { toBool, toNum } from "../apiDataTypeHelper"
-import { ItemEquipmentSlotMappingSEA, ItemEquipmentSlotMappingKMS, PotentialMappingSEA, PotentialMappingKMS } from "@ruvice/my-maple-models";
+import { ItemEquipmentSlotMappingSEA, ItemEquipmentSlotMappingKMS, ItemEquipmentSlotMappingTMS, PotentialMappingSEA, PotentialMappingKMS, PotentialMappingTMS } from "@ruvice/my-maple-models";
 
 function getItemEquipmentSlot(itemEquipmentSlot: string, server: MapleServer) {
     if (server === MapleServer.KMS) {
         return ItemEquipmentSlotMappingKMS[itemEquipmentSlot]
     } else if (server === MapleServer.SEA) {
         return ItemEquipmentSlotMappingSEA[itemEquipmentSlot]
+    } else if (server === MapleServer.TMS) {
+        return ItemEquipmentSlotMappingTMS[itemEquipmentSlot]
     }
     const normalisedEquipmentSlot = itemEquipmentSlot.toLowerCase().replace(/\s+/g, '');
     return ItemEquipmentSlotMappingSEA[normalisedEquipmentSlot]
@@ -21,6 +23,8 @@ function getItemPotential(potentialString: string, server: MapleServer) {
         return PotentialMappingKMS[potentialString]
     } else if (server === MapleServer.SEA) {
         return PotentialMappingSEA[potentialString]
+    } else if (server === MapleServer.TMS) {
+        return PotentialMappingTMS[potentialString]
     }
     return PotentialMappingSEA[potentialString]
 }

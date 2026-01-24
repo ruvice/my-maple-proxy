@@ -5,7 +5,7 @@ import {
     SymbolRegion
 } from "@ruvice/my-maple-models";
 import { toNum, toBool } from "./apiDataTypeHelper";
-import { CharacterClassMappingSEA, CharacterClassMappingKMS, StatMappingKMS, StatMappingSEA } from "@ruvice/my-maple-models";
+import { CharacterClassMappingSEA, CharacterClassMappingKMS, CharacterClassMappingTMS, StatMappingKMS, StatMappingSEA, StatMappingTMS } from "@ruvice/my-maple-models";
 import { parseEquip } from "./parsers/equipmentParser";
 
 
@@ -14,6 +14,8 @@ function getCharacterClass(characterClass: string, server: MapleServer) {
         return CharacterClassMappingKMS[characterClass]
     } else if (server === MapleServer.SEA) {
         return CharacterClassMappingSEA[characterClass]
+    } else if (server === MapleServer.TMS) {
+        return CharacterClassMappingTMS[characterClass]
     }
     return CharacterClassMappingSEA[characterClass]
 }
@@ -23,6 +25,8 @@ function getStatName(statName: string, server: MapleServer) {
         return StatMappingKMS[statName]
     } else if (server === MapleServer.SEA) {
         return StatMappingSEA[statName]
+    } else if (server === MapleServer.TMS) {
+        return StatMappingTMS[statName]
     }
     return StatMappingSEA[statName]
 }
@@ -38,6 +42,12 @@ function getSymbolRegion(name: string, server: MapleServer) {
         if (name.toLowerCase().includes("arcane")) {
             return SymbolRegion.Arcane
         } else if (name.toLowerCase().includes("authentic")) {
+            return SymbolRegion.Grandis
+        }
+    } else if (server === MapleServer.TMS) {
+        if (name.toLowerCase().includes("祕法符文")) {
+            return SymbolRegion.Arcane
+        } else if (name.toLowerCase().includes("真實符文")) {
             return SymbolRegion.Grandis
         }
     }

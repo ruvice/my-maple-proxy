@@ -16,8 +16,22 @@ const OCID_PATH = "v1/id";
 
 export const getOCID = async <T>(params: ProxyOCIDRequest) => {
     const { characterName, server } = params;
-    const apiKey = server === MapleServer.KMS ? process.env.KMS_OPEN_API_KEY : process.env.SEA_OPEN_API_KEY;
-    const serverPath = server === MapleServer.KMS ? 'maplestory/' : 'maplestorysea/'
+    const SERVER_CONFIG: Record<MapleServer, { apiKey?: string; serverPath: string }> = {
+        [MapleServer.KMS]: {
+        apiKey: process.env.KMS_OPEN_API_KEY,
+        serverPath: "maplestory/",
+        },
+        [MapleServer.SEA]: {
+        apiKey: process.env.SEA_OPEN_API_KEY,
+        serverPath: "maplestorysea/",
+        },
+        [MapleServer.TMS]: {
+        apiKey: process.env.TMS_OPEN_API_KEY,
+        serverPath: "maplestorytw/",
+        },
+    };
+    const { apiKey, serverPath } = SERVER_CONFIG[server];
+    
     const url = new URL(`https://open.api.nexon.com/${serverPath + OCID_PATH}`);
     url.searchParams.set("character_name", characterName)
     if (!apiKey) {
@@ -48,8 +62,21 @@ export const getOCID = async <T>(params: ProxyOCIDRequest) => {
 
 export const getFromProxy = async <T>(params: ProxyRequest) => {
     const { path, ocid,  date, server } = params;
-    const apiKey = server === MapleServer.KMS ? process.env.KMS_OPEN_API_KEY : process.env.SEA_OPEN_API_KEY;
-    const serverPath = server === MapleServer.KMS ? 'maplestory/' : 'maplestorysea/'
+    const SERVER_CONFIG: Record<MapleServer, { apiKey?: string; serverPath: string }> = {
+        [MapleServer.KMS]: {
+        apiKey: process.env.KMS_OPEN_API_KEY,
+        serverPath: "maplestory/",
+        },
+        [MapleServer.SEA]: {
+        apiKey: process.env.SEA_OPEN_API_KEY,
+        serverPath: "maplestorysea/",
+        },
+        [MapleServer.TMS]: {
+        apiKey: process.env.TMS_OPEN_API_KEY,
+        serverPath: "maplestorytw/",
+        },
+    };
+    const { apiKey, serverPath } = SERVER_CONFIG[server];
     const url = new URL(`https://open.api.nexon.com/${serverPath + path}`);
     url.searchParams.set("ocid", ocid);
     if (date) {
