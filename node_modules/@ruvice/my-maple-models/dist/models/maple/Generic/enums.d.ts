@@ -56,7 +56,8 @@ export declare enum CharacterClass {
     Kanna = "Kanna",
     Len = "Len",
     MoXuan = "MoXuan",
-    Lynn = "Lynn"
+    Lynn = "Lynn",
+    Lethe = "Lethe"
 }
 export declare enum MapleServer {
     KMS = "KMS",

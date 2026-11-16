@@ -59,6 +59,7 @@ export var CharacterClass;
     CharacterClass["Len"] = "Len";
     CharacterClass["MoXuan"] = "MoXuan";
     CharacterClass["Lynn"] = "Lynn";
+    CharacterClass["Lethe"] = "Lethe";
 })(CharacterClass || (CharacterClass = {}));
 export var MapleServer;
 (function (MapleServer) {
